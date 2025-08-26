@@ -33,7 +33,7 @@ KO_PATTERNS_AVAILABLE = [
     r"Select\s*room", r"Available", r"Book now", r"Rooms? available",
 ]
 KO_PATTERNS_SOLDOUT = [
-    r"매진", r"매진되었습니다", r"객실이\s*없습니다", r"품절", r"객실\s*없음",
+    r"매진", r"매진되었습니다", r"객실이\s*없습니다", r"품절", r"객실\s*없음", r"판매/s*완료",
     r"Sold\s*out", r"No rooms available", r"Fully booked"
 ]
 
@@ -64,9 +64,20 @@ def send_telegram(msg: str) -> None:
     except Exception as e:
         print("[ERROR] Telegram send failed:", e, resp.text[:2000])
 
-def classify_content(text: str) -> str:
+def parse_tussock(text: str) -> str:
+    index = text.find("죄송합니다. 고객님이 선택한")
+    if index == -1:
+        return "available"
+    return "soldout"
+
+def classify_content(edgewater: bool, text: str) -> str:
     # Basic heuristic: soldout beats available if both appear
+    if edgewater:
+        index = text.find("Premium Hotel Room")
+        text = text[index:]
+
     t = " ".join(text.split())
+    print("[LOG]", t)
     available = any(re.search(p, t, flags=re.I) for p in KO_PATTERNS_AVAILABLE)
     soldout = any(re.search(p, t, flags=re.I) for p in KO_PATTERNS_SOLDOUT)
     if available and not soldout:
@@ -79,7 +90,7 @@ def classify_content(text: str) -> str:
         return "available"
     return "unknown"
 
-def check_with_playwright(url: str) -> Tuple[str, str]:
+def check_with_playwright(name: str, url: str) -> Tuple[str, str]:
     """
     Returns (status, evidence) where status in {"available","soldout","unknown"}.
     Evidence is a short snippet for logging.
@@ -122,7 +133,11 @@ def check_with_playwright(url: str) -> Tuple[str, str]:
             except Exception:
                 pass
 
-    status = classify_content(text)
+    isEdgewater = "edgewater" in name
+    if "tussock" in url:
+        status = parse_tussock(text)
+    if "edgewater" in url:
+        status = classify_content(isEdgewater, text)
     evidence = ""
 
     # Try to extract first visible price chunk as evidence
@@ -165,7 +180,7 @@ def main():
         if not url:
             continue
         print(f"[INFO] Checking: {name} -> {url}")
-        status, evidence = check_with_playwright(url)
+        status, evidence = check_with_playwright(name, url)
         key = url
         prev = state.get(key, "unknown")
         new_state[key] = status
