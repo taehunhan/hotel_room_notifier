@@ -133,11 +133,12 @@ def check_with_playwright(name: str, url: str) -> Tuple[str, str]:
             except Exception:
                 pass
 
-    isEdgewater = "edgewater" in name
-    if "tussock" in url:
-        status = parse_tussock(text)
-    if "edgewater" in url:
-        status = classify_content(isEdgewater, text)
+    #isEdgewater = "edgewater" in name
+    #if "tussock" in url:
+        #status = parse_tussock(text)
+    #if "edgewater" in url:
+        #status = classify_content(isEdgewater, text)
+    status = parse_tussock(text)
     evidence = ""
 
     # Try to extract first visible price chunk as evidence
