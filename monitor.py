@@ -33,7 +33,7 @@ KO_PATTERNS_AVAILABLE = [
     r"Select\s*room", r"Available", r"Book now", r"Rooms? available",
 ]
 KO_PATTERNS_SOLDOUT = [
-    r"매진", r"매진되었습니다", r"객실이\s*없습니다", r"품절",
+    r"매진", r"매진되었습니다", r"객실이\s*없습니다", r"품절", r"객실\s*없음",
     r"Sold\s*out", r"No rooms available", r"Fully booked"
 ]
 
