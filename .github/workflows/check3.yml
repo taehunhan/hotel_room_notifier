@@ -25,4 +25,4 @@ jobs:
           WAIT_SEC: "22"
           NAV_TIMEOUT: "60000"
         run: |
-          python monitor.py
+          python monitor3.py

@@ -21,8 +21,8 @@ from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 import requests
 
-STATE_FILE = os.environ.get("STATE_FILE", "state.json")
-SITES_FILE = os.environ.get("SITES_FILE", "sites.json")
+STATE_FILE = os.environ.get("STATE_FILE", "state3.json")
+SITES_FILE = os.environ.get("SITES_FILE", "site3.json")
 USER_AGENT = os.environ.get("USER_AGENT", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
 HEADLESS = os.environ.get("HEADLESS", "1") == "1"
 WAIT_SEC = float(os.environ.get("WAIT_SEC", "20"))
