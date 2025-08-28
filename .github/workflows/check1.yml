@@ -1,4 +1,4 @@
-name: room-availability-check
+name: room-availability-check1
 
 on:
   schedule:
