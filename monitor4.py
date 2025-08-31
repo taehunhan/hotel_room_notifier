@@ -37,7 +37,6 @@ KO_PATTERNS_SOLDOUT = [
     r"Sold\s*out", r"No rooms available", r"Fully booked"
 ]
 ROOM_TYPE = [
-    "호텔룸 (Hotel Room)", 
     "프리미엄 호텔룸 (Premium Hotel Room)",
     "스위트 (Suite)"
 ]
