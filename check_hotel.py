@@ -32,7 +32,7 @@ def check_availability():
         browser.close()
 
         print(content)
-        
+
         # 예약 가능 여부 판정
         if "Sold Out" in content or "Fully Booked" in content:
             return False, "Sold Out"
@@ -44,9 +44,23 @@ def send_telegram(message):
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     requests.post(url, data={"chat_id": chat_id, "text": message})
 
+def debug_iframe():
+    from playwright.sync_api import sync_playwright
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch(headless=True)
+        page = browser.new_page()
+        page.goto(URL, timeout=60000)
+
+        frame = page.frame_locator("iframe[src*='ibex.net.nz']")
+        # iframe 안의 HTML 덤프
+        html = frame.locator("body").inner_html()
+        print(html[:5000])  # 앞부분만 출력
+        browser.close()
+
 if __name__ == "__main__":
-    available, msg = check_availability()
-    if available:
-        send_telegram(f"✅ Room available for {CHECKIN} → {CHECKOUT}!\n{URL}")
-    else:
-        print(f"❌ Not available: {msg}")
+    # available, msg = check_availability()
+    # if available:
+    #     send_telegram(f"✅ Room available for {CHECKIN} → {CHECKOUT}!\n{URL}")
+    # else:
+    #     print(f"❌ Not available: {msg}")
+    debug_iframe()
