@@ -51,10 +51,14 @@ def debug_iframe():
         page = browser.new_page()
         page.goto(URL, timeout=60000)
 
-        frame = page.frame_locator("iframe[src*='ibex.net.nz']")
-        # iframe 안의 HTML 덤프
-        html = frame.locator("body").inner_html()
+        # iframe 나타날 때까지 기다림
+        iframe_element = page.wait_for_selector("iframe[src*='ibex.net.nz']", timeout=60000)
+        frame = iframe_element.content_frame()
+
+        # iframe 안 HTML 덤프
+        html = frame.content()
         print(html[:5000])  # 앞부분만 출력
+
         browser.close()
 
 if __name__ == "__main__":
