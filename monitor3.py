@@ -81,7 +81,7 @@ def check_each_room(text: str, roomtype: str) -> str:
         return "soldout"
     index_newline = text.find("\n", index)
     next_text = text[index:index_newline]
-    print(index + " ~ " + index_newline + ": " + next_text)
+    print(f"{index} ~ {index_newline}: {next_text}")
     index = next_text.find("완료")
     if index == -1:
         return "available"
