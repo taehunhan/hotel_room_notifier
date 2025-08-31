@@ -31,6 +31,8 @@ def check_availability():
 
         browser.close()
 
+        print(content)
+        
         # 예약 가능 여부 판정
         if "Sold Out" in content or "Fully Booked" in content:
             return False, "Sold Out"
