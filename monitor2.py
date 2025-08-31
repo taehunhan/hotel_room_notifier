@@ -126,7 +126,7 @@ def check_with_playwright(name: str, url: str) -> Tuple[str, str]:
             except Exception:
                 pass
 
-    
+    find_roomtype = "empty"
     for rooms in ROOM_TYPE:
         status = check_each_room(text, rooms)
         if status == "available":
