@@ -37,7 +37,6 @@ KO_PATTERNS_SOLDOUT = [
     r"Sold\s*out", r"No rooms available", r"Fully booked"
 ]
 ROOM_TYPE = [
-    "주니어 스위트 (Junior Suite)",
     "슈페리어 킹룸 (Superior King Room)", 
     "슈페리어 레이크뷰 킹룸 (Superior Lake View King Room)",
     "슈페리어룸 (더블베드 2개) (Superior 2 Doubles)"
@@ -70,12 +69,6 @@ def send_telegram(msg: str) -> None:
     except Exception as e:
         print("[ERROR] Telegram send failed:", e, resp.text[:2000])
 
-def parse_tussock(text: str) -> str:
-    index = text.find("죄송합니다. 고객님이 선택한")
-    if index == -1:
-        return "available"
-    return "soldout"
-
 def check_each_room(text: str, roomtype: str) -> str:
     index = text.find(roomtype)
     if index == -1:
@@ -83,32 +76,10 @@ def check_each_room(text: str, roomtype: str) -> str:
     index = text.find("\n", index) + 1
     index_newline = text.find("\n", index)
     next_text = text[index:index_newline]
-    print(f"front: ({text[index:index + 1]}), back: ({text[index_newline - 2:index_newline - 1]})")
-    print(f"{index} ~ {index_newline}({index_newline - index}): {next_text}")
     index = next_text.find("완료")
     if index == -1:
         return "available"
     return "soldout"
-
-def classify_content(edgewater: bool, text: str) -> str:
-    # Basic heuristic: soldout beats available if both appear
-    if edgewater:
-        index = text.find("Premium Hotel Room")
-        text = text[index:]
-
-    t = " ".join(text.split())
-    print("[LOG]", t)
-    available = any(re.search(p, t, flags=re.I) for p in KO_PATTERNS_AVAILABLE)
-    soldout = any(re.search(p, t, flags=re.I) for p in KO_PATTERNS_SOLDOUT)
-    if available and not soldout:
-        return "available"
-    if soldout and not available:
-        return "soldout"
-    # Fallback: presence of prices often implies availability
-    price_like = re.search(r"(₩|KRW|NZD|\$)\s?\d{2,}", t)
-    if price_like and not soldout:
-        return "available"
-    return "unknown"
 
 def check_with_playwright(name: str, url: str) -> Tuple[str, str]:
     """
@@ -156,24 +127,11 @@ def check_with_playwright(name: str, url: str) -> Tuple[str, str]:
     
     for rooms in ROOM_TYPE:
         status = check_each_room(text, rooms)
-        # if status == "available":
-        #     break
-    
-    evidence = ""
+        if status == "available":
+            find_roomtype = rooms
+            break
 
-    # Try to extract first visible price chunk as evidence
-    m = re.search(r"(₩|KRW|NZD|\$)\s?[\d,]{2,}", text)
-    if m:
-        evidence = f"price_hint={m.group(0)}"
-
-    # Also detect Agoda/Booking specific hints
-    if "agoda.com" in url:
-        if "Agoda" not in evidence:
-            evidence = (evidence + " ").strip() + "[Agoda]"
-    if "booking.com" in url:
-        evidence = (evidence + " ").strip() + "[Booking]"
-
-    return status, evidence.strip()
+    return status, find_roomtype
 
 def load_sites() -> List[Dict]:
     with open(SITES_FILE, "r", encoding="utf-8") as f:
@@ -201,14 +159,14 @@ def main():
         if not url:
             continue
         print(f"[INFO] Checking: {name} -> {url}")
-        status, evidence = check_with_playwright(name, url)
+        status, roomtype = check_with_playwright(name, url)
         key = url
         prev = state.get(key, "unknown")
         new_state[key] = status
-        print(f"[INFO] {name}: status={status} (prev={prev}) {evidence} time={now_iso()}")
+        print(f"[INFO] {name}: status={status} (prev={prev}) {roomtype} time={now_iso()}")
 
         if status != prev and status in ("available", "soldout"):
-            msg = f"🏨 <b>{name}</b>\n상태 변화: <b>{prev} ➜ {status}</b>\n{evidence}\n\n{url}"
+            msg = f"🏨 <b>{name}</b>\n상태 변화: <b>{prev} ➜ {status}</b>\n{roomtype}\n\n{url}"
             send_telegram(msg)
 
     save_state(new_state)
