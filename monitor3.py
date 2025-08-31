@@ -83,6 +83,7 @@ def check_each_room(text: str, roomtype: str) -> str:
     index = text.find("\n", index) + 1
     index_newline = text.find("\n", index)
     next_text = text[index:index_newline]
+    print(f"front: ({text[index:index + 1]}), back: ({text[index_newline - 2:index_newline - 1]})")
     print(f"{index} ~ {index_newline}({index_newline - index}): {next_text}")
     index = next_text.find("완료")
     if index == -1:
