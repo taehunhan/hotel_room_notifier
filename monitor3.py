@@ -65,6 +65,7 @@ def send_telegram(msg: str) -> None:
         print("[ERROR] Telegram send failed:", e, resp.text[:2000])
 
 def parse_tussock(text: str) -> str:
+    print(text)
     index = text.find("죄송합니다. 고객님이 선택한")
     if index == -1:
         return "available"
