@@ -37,7 +37,6 @@ KO_PATTERNS_SOLDOUT = [
     r"Sold\s*out", r"No rooms available", r"Fully booked"
 ]
 ROOM_TYPE = [
-    "주니어 스위트 (Junior Suite)",
     "슈페리어 킹룸 (Superior King Room)", 
     "슈페리어 레이크뷰 킹룸 (Superior Lake View King Room)",
     "슈페리어룸 (더블베드 2개) (Superior 2 Doubles)"
