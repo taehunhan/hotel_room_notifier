@@ -33,8 +33,13 @@ KO_PATTERNS_AVAILABLE = [
     r"Select\s*room", r"Available", r"Book now", r"Rooms? available",
 ]
 KO_PATTERNS_SOLDOUT = [
-    r"매진", r"매진되었습니다", r"객실이\s*없습니다", r"품절", r"객실\s*없음", r"판매/s*완료",
+    r"매진", r"매진되었습니다", r"객실이\s*없습니다", r"품절", r"객실\s*없음", r"판매\s*완료",
     r"Sold\s*out", r"No rooms available", r"Fully booked"
+]
+ROOM_TYPE = [
+    "슈페리어 킹룸 (Superior King Room)", 
+    "슈페리어 레이크뷰 킹룸 (Superior Lake View King Room)",
+    "슈페리어룸 (더블베드 2개) (Superior 2 Doubles)"
 ]
 
 def load_state() -> Dict[str, str]:
@@ -65,8 +70,18 @@ def send_telegram(msg: str) -> None:
         print("[ERROR] Telegram send failed:", e, resp.text[:2000])
 
 def parse_tussock(text: str) -> str:
-    print(text)
     index = text.find("죄송합니다. 고객님이 선택한")
+    if index == -1:
+        return "available"
+    return "soldout"
+
+def check_each_room(text: str, roomtype: str) -> str:
+    index = text.find(roomtype)
+    if index == -1:
+        return "soldout"
+    index_newline = text.find(index, "\n")
+    next_text = text[index:index_newline]
+    index = next_text.find("완료")
     if index == -1:
         return "available"
     return "soldout"
@@ -134,12 +149,12 @@ def check_with_playwright(name: str, url: str) -> Tuple[str, str]:
             except Exception:
                 pass
 
-    #isEdgewater = "edgewater" in name
-    #if "tussock" in url:
-        #status = parse_tussock(text)
-    #if "edgewater" in url:
-        #status = classify_content(isEdgewater, text)
-    status = parse_tussock(text)
+    
+    for rooms in ROOM_TYPE:
+        status = check_each_room(text, rooms)
+        if status == "available":
+            break
+    
     evidence = ""
 
     # Try to extract first visible price chunk as evidence
