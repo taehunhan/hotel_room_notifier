@@ -27,27 +27,6 @@ jobs:
         run: |
           python monitor1.py
 
-  monitor3:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Install deps
-        run: |
-          pip install -r requirements.txt
-          python -m playwright install chromium
-      - name: Run monitor3
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          HEADLESS: "1"
-          WAIT_SEC: "22"
-          NAV_TIMEOUT: "60000"
-        run: |
-          python monitor3.py
-
   monitor4:
     runs-on: ubuntu-latest
     steps:
